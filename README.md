@@ -99,7 +99,6 @@ That is it for the basic usage.
 Other more complex activities include setting up lookup queries for complex relational data, saving many-to-many relational data, tunneling to mysql via ssh, multithreaded write support, and setting up event callbacks.
 
 I will try to get some more complex examples added in the future.
-Some more complex examples soon.
    
     
 
