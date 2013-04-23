@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 /**
- *
+ * A schema with attributes and methods relevant to an Sql database table
  * @author ryan
  */
 public class SqlTableSchema extends BasicSchema implements RelationalSchema{

@@ -67,7 +67,7 @@ public class JavaSql {
 
     /**
      * returns a Mapping of the java.sql.Types to a corresponding java class
-     * @param sqlType
+     * @param jdbcType
      * @return java class corresponding to sqlType
      */
     public static Class sqlTypeToClass(int jdbcType)

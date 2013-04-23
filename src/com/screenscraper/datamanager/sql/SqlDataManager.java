@@ -32,7 +32,9 @@ public class SqlDataManager extends BasicDataManager implements DataManager
     private ConcurrentHashMap<String, DataObject> lastAutoIncrementValues;
     ThreadPoolExecutor executor;
 
-    /**     *
+    /**
+     * Construct an SqlDatamanager for the given dataSource.  After construction buildSchemas
+     * is called to read the table structure in the database
      * @param dataSource
      */
     public SqlDataManager(BasicDataSource dataSource)
@@ -61,7 +63,7 @@ public class SqlDataManager extends BasicDataManager implements DataManager
     
     /**
      * return a set of the columns which are primary keys defined in the SqlSchema
-     * @param s
+     * @param table
      * @return
      */
     public Set<String> getPrimaryKeys(String table)
@@ -167,14 +169,8 @@ public class SqlDataManager extends BasicDataManager implements DataManager
      * @return Sql Connection
      * @throws java.sql.SQLException
      */
-    public synchronized Connection getConnection() throws SQLException
+    public Connection getConnection() throws SQLException
     {
-        /*
-        if(ds.getNumIdle()==0){
-            log.warn("No free database connections");
-        }
-         * 
-         */
         return ds.getConnection();
     }
 
@@ -221,7 +217,8 @@ public class SqlDataManager extends BasicDataManager implements DataManager
 
       /**
      * verifies that the data is ready to be inserted.  If false is returned
-     * the cause can be retrieved via getMessage.
+     * the cause can be retrieved via getMessage. Causes for failure include
+     * unmet column and key constraints
      * @param schema
      * @return true if data meets constraints defined in the AbstractSchema
      */
@@ -237,7 +234,7 @@ public class SqlDataManager extends BasicDataManager implements DataManager
         return validateData(n);
     }
 
-       /**
+     /**
      * toggles automatically generating many to many relationship nodes based
      * on schema information.  If a table has foreign keys to two or more tables,
      * those tables have been added, and all other constraints are met, the many
@@ -465,7 +462,13 @@ public class SqlDataManager extends BasicDataManager implements DataManager
         }
         return true;
     }
-    
+
+	/**
+	 * Checks the key constraints, null constraints, and column length constraints
+	 * for the data
+	 * @param n
+	 * @return
+	 */
     public boolean validateData(DataNode n){
         
        RelationalSchema schema = n.getSchema();
@@ -486,7 +489,12 @@ public class SqlDataManager extends BasicDataManager implements DataManager
         }
         return true;
     }
-    
+
+	/**
+	 * Checks the pk constraints and uniqueIndex constraints for the given data
+	 * @param n
+	 * @return
+	 */
     boolean keyConstraintsMet(DataNode n){
         SchemaKey pk = n.getSchema().getPrimaryKey();
         if(constraintMet(n,pk))

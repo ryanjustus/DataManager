@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- *
+ * Designed to lookup an entity in the database that matches the given parameters for Microsoft SQL Server
  * @author ryan
  */
 public class MsSqlLookup extends SqlLookup{

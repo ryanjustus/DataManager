@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 /**
  * A wrapper for java.sql.PreparedStatement that adds methods for dealing Directly
- * interacting with the DataObject class, as well of methods to retrive values
+ * interacting with the DataObject class, as well of methods to retrieve values
  * that were used in the preparation of the PreparedStatement
  * @author ryan
  */
@@ -44,32 +44,6 @@ public final class DmPreparedStatement implements java.sql.PreparedStatement{
         PreparedStatement psL = con.prepareStatement(sql.toString(),java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_UPDATABLE);
         //PreparedStatement psL = con.prepareStatement(sql.toString(),java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE, java.sql.ResultSet.CONCUR_UPDATABLE);
         init(psL,sql);
-    }
-
-
-    public static DmPreparedStatement prepareQuery(Connection con, String sql, Map<String,DataObject> values) throws SQLException
-    {
-        String tp ="~#([^#]*)#~";
-        Pattern tokenPattern = Pattern.compile(tp);
-        Matcher matcher = tokenPattern.matcher(sql);
-        ArrayList<DataObject> psInput = new ArrayList<DataObject>();
-        while( matcher.find() )
-        {
-            String token = matcher.group( 1 ).trim();
-
-            if( values.containsKey( token.toLowerCase() ))
-            {
-                psInput.add(values.get(token));
-            }
-            else
-            {
-                throw new IllegalArgumentException(token + " not set in values");
-            }
-        }
-        sql = sql.replaceAll(tp, "?");
-        DmPreparedStatement ps = new DmPreparedStatement(con,sql);
-        ps.setData(psInput);
-        return ps;
     }
 
     /**
@@ -150,34 +124,35 @@ public final class DmPreparedStatement implements java.sql.PreparedStatement{
         }else {
             Object value = data.getObject();
             ObjectType type = data.getType();
-            if(type.equals(ObjectType.Object)){
-                ps.setObject(i, value);
-            }else if(type.equals(ObjectType.String)){
-                ps.setString(i, (String)value);
-            }else if(type.equals(ObjectType.ByteArray)){
-                ps.setBytes(i, (byte[])value);
-            }else if(type.equals(ObjectType.Byte)){
-                ps.setByte(i, (Byte)value);
-            }else if(type.equals(ObjectType.Short)){
-                ps.setShort(i, (Short)value);
-            }else if(type.equals(ObjectType.Integer)){
-                ps.setInt(i, (Integer)value);
-            }else if(type.equals(ObjectType.Float)){
-                ps.setFloat(i,(Float)value);
-            }else if(type.equals(ObjectType.Double)){
-                ps.setDouble(i, (Double)value);
-            }else if(type.equals(ObjectType.Long)){
-                ps.setLong(i, (Long)value);
-            }else if (type.equals(ObjectType.Boolean)) {
-                ps.setBoolean(i, (Boolean)value);
-            }else if(type.equals(ObjectType.Timestamp)){
-                ps.setTimestamp(i, (java.sql.Timestamp)value);
-            }else if(type.equals(ObjectType.Time)){
-                ps.setTime(i, (java.sql.Time)value);
-            }else if(type.equals(ObjectType.Date)) {
-                ps.setDate(i, (java.sql.Date)value);
-            }else{
-                ps.setObject(i, value);
+	        switch(type){
+		        case Object:  ps.setObject(i, value);
+			        break;
+		        case String: ps.setString(i, (String)value);
+			        break;
+		        case ByteArray:  ps.setBytes(i, (byte[])value);
+			        break;
+		        case Byte: ps.setByte(i, (Byte)value);
+			        break;
+		        case Short: ps.setShort(i, (Short)value);
+			        break;
+		        case Integer: ps.setInt(i, (Integer)value);
+			        break;
+		        case Float: ps.setFloat(i,(Float)value);
+			        break;
+		        case Double: ps.setDouble(i, (Double)value);
+			        break;
+		        case Long: ps.setLong(i, (Long)value);
+			        break;
+		        case Boolean: ps.setBoolean(i, (Boolean)value);
+			        break;
+		        case Timestamp: ps.setTimestamp(i, (java.sql.Timestamp)value);
+			        break;
+		        case Time:  ps.setTime(i, (java.sql.Time)value);
+	                break;
+		        case Date: ps.setDate(i, (java.sql.Date)value);
+			        break;
+                default:
+                    ps.setObject(i, value);
             }
         }
        this.data.put(i, data);

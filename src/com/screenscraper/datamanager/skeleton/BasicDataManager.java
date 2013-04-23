@@ -15,20 +15,21 @@ import com.screenscraper.datamanager.DataWriter;
 import com.screenscraper.datamanager.DatabaseSchema;
 import com.screenscraper.datamanager.RootNode;
 import com.screenscraper.datamanager.RelationalSchema;
-import com.screenscraper.datamanager.SchemaAttr;
 import com.screenscraper.datamanager.SchemaForeignKey;
 import com.screenscraper.datamanager.util.LogAppender;
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
-import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
+
+
+
 
 /**
  * A DataManager contains the tree of DataNodes and also provides useful methods 
@@ -43,7 +44,7 @@ import org.apache.log4j.Logger;
  *
  * @author ryan
  */
-public class BasicDataManager implements DataManager{
+public abstract class BasicDataManager implements DataManager{
 
     //the root node of the DataManager, all nodes you add will be an ancestor of this
     //Mutable data
@@ -60,7 +61,6 @@ public class BasicDataManager implements DataManager{
 
     /**
      * Creates a DataManager tied to a screen-scraper session
-     * @param session
      */
     public BasicDataManager()
     {
@@ -76,121 +76,59 @@ public class BasicDataManager implements DataManager{
         root = new RootNode();
         currentDataNodes=new HashMap<String,DataNode>();
     }
-    
+
+	/**
+	 * Add an appender to receive log events from the DataManager
+	 * @param log
+	 */
     public void appendToLogger(Logger log){
         logAppender.addLogger(log);
     }
 
-    public void buildSchemas(){
-        throw new UnsupportedOperationException();
-    }
 
+	/**
+	 * Factory method to construct a DataWriter for the endpoint
+	 * @return
+	 */
     protected DataWriter getNewDataWriter(){
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Must be overriden by implementing class");
     }
 
-    public boolean importSchemas(String file){
-        throw new UnsupportedOperationException();
-    }  
-    
-    public Set<String> getColumns(String table)
+
+	/**
+	 * Retrieves the set of columns for the given schema name
+ 	 * @param schema
+	 * @return
+	 */
+    public Set<String> getColumns(String schema)
     {
-        return schema.getRelationalSchema(table).getColumns();
+        return this.schema.getRelationalSchema(schema).getColumns();
     }
+
 
     /**
-     * NOT YET FULLY IMPLEMENTED
-     * Export the current schema to the given file
-     * @param file
-     * @return true if export is successful
+     * returns a schema with the given identifier (case insensitive)
+     * @param schema
+     * @return RelationalSchema corresponding the schema name
      */
-    /*
-    private boolean exportSchemas(String file)
-    {
-        try{
-         if(schema==null)
-            return false;
-         File test = new File(file);
-         if(test.exists())
-             test.delete();
-        //bulid the schemas for the xml that contains the schema definitions
-        //TODO: Replace use of deprecated methods
-        XmlDataManager dm = new XmlDataManager(file);
-        String[] empty = {};
-        String[] schemaVars = {"schema_identifier", "name"};
-        dm.addSchema("schema", schemaVars, empty);
-        dm.addSchema("schemas", empty, empty);
-        String [] columnVars = {"name"};
-        dm.addSchema("column", columnVars, empty);
-        dm.addSchema("columns", empty, empty);
-        String[] attributeVars = {"name", "value"};
-        dm.addSchema("attribute", attributeVars, empty);
-        dm.addSchema("attributes",empty, empty);
-
-        //loop through schema->columns->attributes adding data to DataNode tree with schemas_node at the root
-        DataNode schemasNode = dm.getNewDataNode("schemas");
-        dm.addData(schemasNode);
-        for(RelationalSchema s:schema.getRelationalSchemas())
-        {
-            Map<String, Object> schemaData = new HashMap<String, Object>();
-            schemaData.put("name", s.getName());
-            DataNode schemaNode = dm.getNewDataNode("schema");
-            schemasNode.addChild(schemaNode);
-            DataNode columnsNode = dm.getNewDataNode("columns");
-            schemaNode.addChild(columnsNode);
-            schemaNode.addData(schemaData);
-            for(String column:s.getColumns())
-            {
-                DataNode columnNode = dm.getNewDataNode("column");
-                columnsNode.addChild(columnNode);
-                DataNode attributesNode = dm.getNewDataNode("attributes");
-                columnNode.addChild(attributesNode);
-                columnNode.addData("name", column);
-                Map<SchemaAttr, String> attributes = s.getAttrs(column);
-                for(SchemaAttr attribute:attributes.keySet())
-                {
-                    Map<String, String> attributeData = new HashMap<String, String>();
-                    attributeData.put("name", attribute.toString());
-                    attributeData.put("value", attributes.get(attribute));
-                    DataNode attributeNode = dm.getNewDataNode("attribute");
-                    attributeNode.addData(attributeData);
-                    attributesNode.addChild(attributeNode);
-                }
-            }
-        }
-        try {
-            //write out the xml file
-            dm.flush();
-        } catch (Exception ex) {
-            log.error("error on flush", ex);
-            return false;
-        }
-        }catch(Exception e){
-            log.error("error on flush", e);
-        }
-        return true;
-    }
-     * 
-     */
-
-    /**
-     * returns a schema with the given identifier
-     * @param table
-     * @return AbstractSchema corresponding the table
-     */
-    public RelationalSchema getSchema(String table) {
-       for(RelationalSchema s: schema.getRelationalSchemas())
+    public RelationalSchema getSchema(String schema) {
+       for(RelationalSchema s: this.schema.getRelationalSchemas())
        {
-           if(s.getName().toLowerCase().equals(table.toLowerCase()))
+           if(s.getName().toLowerCase().equals(schema.toLowerCase()))
                return s;
        }
-       throw new IllegalArgumentException("Unknown schema " + table);
+       throw new IllegalArgumentException("Unknown schema " + schema);
     }
-    
-    public boolean hasSchema(String table){
-       for(RelationalSchema s: schema.getRelationalSchemas())
+
+	/**
+	 * Returns whether or not the given schema is known to the DataManager
+	 * @param schema
+	 * @return
+	 */
+    public boolean hasSchema(String schema){
+       for(RelationalSchema s: this.schema.getRelationalSchemas())
        {
-           if(s.getName().toLowerCase().equals(table.toLowerCase()))
+           if(s.getName().toLowerCase().equals(schema.toLowerCase()))
                return true;
        }
        return false;        
@@ -199,31 +137,31 @@ public class BasicDataManager implements DataManager{
      /**
      * Sets all the nodes to be able to overwrite columns in the table
      * with the new values when there is a primary key match.
-     * @param table
+     * @param schema
      * @param update: default false
      */
-    public void setUpdateEnabled(String table, boolean update)
+    public void setUpdateEnabled(String schema, boolean update)
     {
-        table = getSchema(table).getName();
+        schema = getSchema(schema).getName();
         if(update){
-            updateable.add(table);
+            updateable.add(schema);
         }else
-            updateable.remove(table);
+            updateable.remove(schema);
     }
 
     /**
      * Sets all the nodes to be able to merge the values with the corresponding
-     * rows in the table when there is a primary key match.
-     * @param table
+     * rows in the schema when there is a primary key match.
+     * @param schema
      * @param merge: default false
      */
-    public void setMergeEnabled(String table, boolean merge)
+    public void setMergeEnabled(String schema, boolean merge)
     {
-        table = getSchema(table).getName();
+        schema = getSchema(schema).getName();
         if(merge){
-            mergeable.add(table);
+            mergeable.add(schema);
         }else
-            mergeable.remove(table);
+            mergeable.remove(schema);
     }
 
      /**
@@ -274,60 +212,6 @@ public class BasicDataManager implements DataManager{
         n.getSchema().fireEvent(EventFireTime.onAddData, new DataManagerEvent(this,n));
     }
 
-    /**
-     * Merges the passed in DataNode with DataNodes currently in the
-     * tree structure where all the keys match.  For a key match to appear
-     * all of the keys have to be set
-     * @param schema
-     * @param data
-     * @return number of DataNodes that were merged
-     */
-    /*
-    int mergeByKeys(DataNode node) throws UnsupportedEncodingException{
-        int merges=0;
-        Schema s = node.getSchema();
-        Set<String> keys = s.getKeys();
-        //if we have all of the keys present in the data
-        Map<String,DataObject> data = node.getValues();
-        //if we have a complete set of keys
-        if(DataStructureUtils.containsAllIgnoreCase(keys, data.keySet())){
-            //Search DataNode for matches based on keys            
-            Map<String,Object> keyData = new HashMap<String,Object>();
-            for(String key: keys){
-                //if any value is null return 0;
-                if(data.get(key)==null || data.get(key).getObject()==null)
-                    return 0;
-                keyData.put(key, data.get(key));
-            }
-            SelectOperator select = new SelectOperator(s.getName(),this);
-            select.addConstraint(keyData);
-            SortedSet<DataNode> matches = select.getMatches();
-
-            //for each match add in the data, newer data overwrites old, based on
-            //DataNode creation time
-            Map<String,DataObject> tempData = new HashMap<String,DataObject>();
-            for(DataNode match: matches){                
-                merges++;
-                for(DataNode parent: match.getParents()){
-                    node.addParent(parent);
-                    parent.removeChild(match);
-                }
-                for(DataNode child: match.getChildren()){
-                    node.addChild(child);
-                    child.removeParent(match);
-                }
-                Map<String,DataObject> existingData = match.getValues();
-                tempData.putAll(existingData);
-                //remove the node from the DataNode Tree
-            }
-            tempData.putAll(data);
-            //add in the data to the currentDataNode
-            node.addData(tempData);
-        }
-        return merges;
-    }
-     *
-     */
 
     /**
      * Add data from the session variables to the table.
@@ -335,19 +219,19 @@ public class BasicDataManager implements DataManager{
      * @param schema
      * @throws java.io.UnsupportedEncodingException
      */
-    public void addData(String schema, String columName, Object value)
+    public void addData(String schema, String columnName, Object value)
     {
         HashMap<String, Object>m = new HashMap();
-        m.put(columName, value);
+        m.put(columnName, value);
         addData(schema, m);
     }
     
 
     /**
-     * commits the row of data corresponding to the schema, so the next time addData is called
+     * commits the row of data corresponding to the schema(table), so the next time addData is called
      * it will be in a new row.
      *
-     * @param table
+     * @param schema, name of schema you are committing
      * @return the value of checkDataNode called on the corresponding DataNode
      */
     public boolean commit(String schema)
@@ -479,12 +363,12 @@ public class BasicDataManager implements DataManager{
      * only be used if for some reason you need manual manipulation of the DataNode
      * or DataNode tree. In general a DataManager.addData method should be used for
      * adding data
-     * @param table
+     * @param schema
      * @return The new data node or null if the schema was invalid
      */
-    public DataNode getNewDataNode( String table )
+    public DataNode getNewDataNode( String schema )
     {
-        RelationalSchema s = getSchema(table);
+        RelationalSchema s = getSchema(schema);
         DataNode n = new DataNode(s);
         s.fireEvent(EventFireTime.onCreate, new DataManagerEvent(this,n));
         return n;        
@@ -530,19 +414,8 @@ public class BasicDataManager implements DataManager{
     }
 
     /**
-     * writes out the root dataNode(without clearing the data structure) with the default DataWriter
-     * @throws java.lang.Exception
-     */
-    public synchronized boolean write()
-    {
-        DataWriter dw = getNewDataWriter();
-        boolean returnval = dw.write(root);
-        return returnval;
-    }
-
-    /**
-     * returns the root node of the DataNode tree.  This can be handed off to a
-     * DataFilter to do preprocessing before the tree is written to the database.
+     * returns the root node of the DataNode tree.
+     * In most cases there is no need to ever manipulate the tree structure with the data
      * @return RootNode of the DataNode tree
      */
     public RootNode getRoot()
@@ -658,18 +531,34 @@ public class BasicDataManager implements DataManager{
 
 
     public void close(){
-        
+
     }
 
+
+	/**
+	 * Removes uncommitted data for the given schema name
+	 * @param schema
+	 */
     public void clearData(String schema) {
         this.currentDataNodes.remove(schema);
     }
 
+	/**
+	 * Set the database schema.  Normally buildSchemas is called to initialize the schemas, but it is possible
+	 * to manually build or import the schemas instead
+	 * @param s
+	 * @return
+	 */
     public DataManager setDatabaseSchema(DatabaseSchema s) {
         schema = s;
         return this;
     }
 
+	/**
+	 * Returns the current DatabaseSchema the DataManager instance is using.  A DatabaseSchema corresponds to
+	 * a description of all the tables in a relational database
+	 * @return
+	 */
     public DatabaseSchema getDatabaseSchema() {
         return schema;
     }
@@ -688,7 +577,8 @@ public class BasicDataManager implements DataManager{
     /**
      * Adds a DataAssertion to be run
      * A DataAssertion is a special case of a DataManagerEvent that executes
-     * onSuccess if the assertion passes and onFail if the assertion fails
+     * onSuccess if the assertion passes and onFail if the assertion fails.
+     * It is one way to filter out garbage data before it is written
      * @param d
      * @param when
      * @return 
@@ -702,13 +592,13 @@ public class BasicDataManager implements DataManager{
                     d.onFail();
                 }
             }
-            
         };
         return addEventListener(d.getSchema(), when, l);
     }
     
     /**
-     * Adds an event listener
+     * Adds an event listener.  Event listeners are fired at specific times and can be used to perform callbacks
+     * when certain actions occur, such as a failure to insert a given DataNode
      * @param schema
      * @param when
      * @param listener
@@ -720,7 +610,7 @@ public class BasicDataManager implements DataManager{
     }
     
     /**
-     * Adds an event listener
+     * Removes an event listener
      * @param schema
      * @param when
      * @param listener 
@@ -730,7 +620,8 @@ public class BasicDataManager implements DataManager{
         s.removeEventListener(when, listener);
        
     }
-    
+
+
     public void logDebug(Object message){
         log.debug(message);
     }

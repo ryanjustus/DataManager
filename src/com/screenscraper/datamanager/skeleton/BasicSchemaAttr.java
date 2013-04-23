@@ -11,7 +11,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 /**
- *
+ *  SchemaAttr are attributes about a given column in the schema such as its type, default value, etc
  * @author ryan
  */
 public enum BasicSchemaAttr implements SchemaAttr{

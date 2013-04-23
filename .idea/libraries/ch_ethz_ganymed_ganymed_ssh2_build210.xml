@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="ch.ethz.ganymed:ganymed-ssh2:build210" type="repository">
+    <properties maven-id="ch.ethz.ganymed:ganymed-ssh2:build210" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/ganymed-ssh2-build210.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

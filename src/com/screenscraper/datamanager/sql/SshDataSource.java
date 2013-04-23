@@ -9,6 +9,9 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Construct a datasource that tunnels through an ssh connection
+ */
 public class SshDataSource extends BasicDataSource {
 
     public static final String MYSQL = "MySql";

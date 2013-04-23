@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * Additional DatabaseSchema parameters relevant to Sql databases
  * @author ryan
  */
 public class SqlDatabaseSchema extends DatabaseSchema{
@@ -42,7 +42,4 @@ public class SqlDatabaseSchema extends DatabaseSchema{
             return defaultOption;
         }        
     }
-
-
-    
 }
