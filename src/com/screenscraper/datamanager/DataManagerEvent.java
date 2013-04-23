@@ -18,7 +18,7 @@ public class DataManagerEvent extends EventObject{
 
     /**
      *
-     * @param o
+     * @param source, The DataWriter or DataManager that sent the event
      * @param n
      */
     public DataManagerEvent(Object source,DataNode n)
