@@ -365,18 +365,30 @@ public class DataObject
             throw new IllegalArgumentException("Object type " + value.getClass() + " cannot be used for ObjectType" + type.toString());
         }
     }
-    
-    
-    
+
+
+	/**
+	 * gets the ObjectType of the DataObject.  ObjectType has information that helps the DataManager convert from
+	 * Java types to database target types
+	 * @return ObjectType
+	 */
     public ObjectType getType(){
         return type;
     }
 
+	/**
+	 * Return the object that is contained in the DataObject
+	 * @return
+	 */
     public Object getObject(){
         return value;
     }
 
-
+	/**
+	 * Attempt to serialize the given object
+	 * @param o
+	 * @return
+	 */
     public static byte[] serializeObject(Object o)
     {
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
@@ -393,6 +405,12 @@ public class DataObject
         }
     }
 
+	/**
+	 * An object is equal if it is an instance of DataObject, the ObjectType is equivalent, and the equals method on the
+	 * contained object returns true.
+	 * @param o
+	 * @return
+	 */
     @Override
     public boolean equals(Object o){
         if(o instanceof DataObject){
@@ -405,6 +423,10 @@ public class DataObject
         return false;
     }
 
+	/**
+	 * The hashcode is calculated based on the ObjectType and contained object
+	 * @return
+	 */
     @Override
     public int hashCode() {
         int hash = 7;
@@ -413,6 +435,10 @@ public class DataObject
         return hash;
     }
 
+	/**
+	 * Returns a string representation of the Object
+	 * @return
+	 */
     @Override
     public String toString()
     {
@@ -438,6 +464,10 @@ public class DataObject
             return String.valueOf(value);
     }
 
+	/**
+	 * Retrieve the object as a BigDecimal or throws a ClassCastException if it can't
+	 * @return
+	 */
     public BigDecimal getBigDecimal(){
         if(this.type==DataObject.ObjectType.BigDecimal){
             return (BigDecimal)value;
@@ -457,6 +487,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to BigDecimal for " + value);
     }
 
+	/**
+	 * Retrieve the object as a Boolean or throws a ClassCastException if it can't
+	 * @return
+	 */
     public Boolean getBoolean(){
         if(this.type==DataObject.ObjectType.Boolean){           
             return (Boolean)this.value;
@@ -464,7 +498,11 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Boolean for " + value);
     }
 
- 
+
+	/**
+	 * Retrieve the object as a Byte or throws a ClassCastException if it can't
+	 * @return
+	 */
     public Byte getByte(){
         if(this.type==DataObject.ObjectType.Byte){
             return (Byte)this.value;
@@ -472,6 +510,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Byte for " + value);
     }
 
+	/**
+	 * Retrieve the object as a java.sql.Date or throws a ClassCastException if it can't
+	 * @return
+	 */
     public java.sql.Date getDate(){
         if(this.type==ObjectType.Date){
             return (java.sql.Date)this.value;
@@ -479,6 +521,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to java.sql.Date for " + value);
     }
 
+	/**
+	 * Retrieve the object as a java.sql.Time or throws a ClassCastException if it can't
+	 * @return
+	 */
     public java.sql.Time getTime(){
         if(this.type==ObjectType.Time){
             return (java.sql.Time)this.value;
@@ -486,6 +532,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to java.sql.Time for " + value);
     }
 
+	/**
+	 * Retrieve the object as a java.sql.Timestamp or throws a ClassCastException if it can't
+	 * @return
+	 */
     public java.sql.Timestamp getTimestamp(){
         if(this.type==ObjectType.Timestamp){
             return (java.sql.Timestamp)this.value;
@@ -493,6 +543,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to java.sql.Timestamp for " + value);
     }
 
+	/**
+	 * Retrieve the object as a Double or throws a ClassCastException if it can't
+	 * @return
+	 */
      public Double getDouble(){
         if(this.type==ObjectType.Double){
             return (Double)this.value;
@@ -510,6 +564,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Double for " + value);
      }
 
+	/**
+	 * Retrieve the object as a Float or throws a ClassCastException if it can't
+	 * @return
+	 */
      public Float getFloat(){
         if(type==ObjectType.Float){
             return (Float)value;
@@ -525,6 +583,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Float for " + value);
      }
 
+	/**
+	 * Retrieve the object as a Integer or throws a ClassCastException if it can't
+	 * @return
+	 */
      public Integer getInt(){
         if(type==ObjectType.Integer){
             return (Integer)value;
@@ -536,6 +598,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Integer for " + value);
      }
 
+	/**
+	 * Retrieve the object as a Long or throws a ClassCastException if it can't
+	 * @return
+	 */
      public Long getLong(){
          if(type==ObjectType.Long){
             return (Long)value;
@@ -549,6 +615,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Long for " + value);
      }
 
+	/**
+	 * Retrieve the object as a Short or throws a ClassCastException if it can't
+	 * @return
+	 */
      public Short getShort(){
         if(type==ObjectType.Short){
             return (Short)value;
@@ -558,6 +628,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Short for " + value);
      }
 
+	/**
+	 * Retrieve the object as a Byte[] or throws a ClassCastException if it can't
+	 * @return
+	 */
     public Byte[] getBytes(){
         if(type==ObjectType.ByteArray){
             return (Byte[])value;
@@ -565,6 +639,10 @@ public class DataObject
         throw new ClassCastException("cannot convert " + type + " to Byte[] for " + value);
     }
 
+	/**
+	 * Retrieve the object as a String
+	 * @return
+	 */
     public String getString(){
         if(type==ObjectType.String){
             return (String)value;
@@ -572,6 +650,11 @@ public class DataObject
         return String.valueOf(value);
     }
 
+	/**
+	 * Retrieve the object as an InputStream.  If it is not already an InputStream type it will attempt to
+	 * serialize the object via DataObject.serializeObject
+	 * @return
+	 */
     public InputStream getInputStream(){
 
         if(type==ObjectType.InputStream){
@@ -579,7 +662,12 @@ public class DataObject
         }
         return new ByteArrayInputStream(DataObject.serializeObject(value));
     }
-    
+
+	/**
+	 * Attempts to extract a number from the String with the regex "-?[0-9]+(\\.[0-9]+)?"
+	 * @param input
+	 * @return
+	 */
     private static BigDecimal extractNumberFromString(String input){
          //get rid of all the extra non number junk
         Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
